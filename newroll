@@ -1,14 +1,14 @@
 #!/bin/bash
-# $Id: newroll,v 1.16 2021/05/17 13:26:38 fulford Exp fulford $
+# $Id: newroll,v 1.17 2021/05/17 13:34:42 fulford Exp fulford $
 # $Source: /src/admin/usr/local/etc/RCS/newroll,v $
-# $Revision: 1.16 $
+# $Revision: 1.17 $
 # Author C W Fulford.
 # Copyright 2016 (c) C W Fulford.
 # Licensed for public use under the LGPL, .
 # For assistance contact fulford@fulford.net 0793 572 8612
 ########################################################################
 cmd=`basename $0`
-ver=`echo "$Id: newroll,v 1.16 2021/05/17 13:26:38 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
+ver=`echo "$Id: newroll,v 1.17 2021/05/17 13:34:42 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
 syntax="$cmd [-c <configfile>] [-d] [-h <hostid>] [-p] [-v]|-V"
 prep=1
 verbose=1
@@ -18,32 +18,32 @@ while [ $# -gt 0 ] ;do
 		-h) hostid=$2;shift 2;;
 		-p) prep=0;shift;;	
 		-v) verbose=0;shift;;
-		-V) echo "$cmd $Revision: 1.16 $ $Date: 2021/05/17 13:26:38 $"|awk '{print $1,$3,$6}';exit;;  
+		-V) echo "$cmd $Revision: 1.17 $ $Date: 2021/05/17 13:34:42 $"|awk '{print $1,$3,$6}';exit;;  
 	esac
 done
 
 cmd=`basename $0`
 
 mntPt=/media/cf
-[ $verbose -eq 0 ] &&  echo $mntPt
+[ $verbose -eq 0 ] &&  echo "$cmd: Mount point is $mntPt."
 srcDir=$mntPt/DCIM/101EOS5D
-[ $verbose -eq 0 ] &&  echo $srcDir 
+[ $verbose -eq 0 ] &&  echo "$cmd: Source directory $srcDir."
 destBase=~/cwf/pics/roll
-[ $verbose -eq 0 ] &&  echo $destBase 
+[ $verbose -eq 0 ] &&  echo "$cmd: Roll directory $destBase."
 
 # Mount the sdhc/cf card
 mount | 
 if grep -q "$mntPt" ;then
 	sudo umount $mntPt
-	[ $verbose -eq 0 ] &&  echo "$mntPt unmounted"
+	[ $verbose -eq 0 ] &&  echo "$cmd: $mntPt unmounted."
 fi
 for dev in sdj1 sdk1 ;do
   if [ -e /dev/$dev ];then
 	mount /dev/$dev ||{
-		echo "$cmd: on $mntPt failed" >&2; continue
+		echo "$cmd: on $mntPt failed." >&2; continue
 	}
 	if [ -d $mntPt/DCIM/101EOS5D ] ;then 
-		[ $verbose -eq 0 ] && echo "$cmd: $dev mounted on $mntPt"
+		[ $verbose -eq 0 ] && echo "$cmd: $dev mounted on $mntPt."
 		break
 	else
 		[ $verbose -eq 0 ] && echo "$cmd: $dev is not a CF card." >&2;
@@ -51,7 +51,7 @@ for dev in sdj1 sdk1 ;do
 		continue
 	fi
   else
-	[ $verbose -eq 0 ] && echo "$cmd: device /dev/$dev does not exist." >&2
+	[ $verbose -eq 0 ] && echo "$cmd: Device /dev/$dev does not exist." >&2
   fi 
 done
 if [ ! -d $mntPt/DCIM/101EOS5D ] ;then 
@@ -60,33 +60,33 @@ if [ ! -d $mntPt/DCIM/101EOS5D ] ;then
 fi
 ##
 
-cd $srcDir ||{ echo "$cmd: cd to $srcDir failed" >&2;exit 1 ;}
+cd $srcDir ||{ echo "$cmd: cd to $srcDir failed." >&2;exit 1 ;}
 noImages=`ls *.CR2 2>/dev/null |wc -l`
-[ $noImages -lt 1 ] &&{ echo "$cmd: No images found in $srcDir">&2
+[ $noImages -lt 1 ] &&{ echo "$cmd: No images found in $srcDir.">&2
 	cd ~
 	umount $mntPt
 	exit 1 
 }
 
 lastFile=`ls | awk 'END{print}'`
-[ $verbose -eq 0 ] &&  echo "$lastFile"
+[ $verbose -eq 0 ] &&  echo "$cmd: Last file  $lastFile."
 lastDate=`stat -c %y $lastFile |awk '{print gensub("-","","g",$1)}'`
-[ $verbose -eq 0 ] && echo $lastDate
+[ $verbose -eq 0 ] && echo "$cmd: last date $lastDate."
 cd "$destBase"
 roll=`ls -d ????????-???? | awk -F"-" 'END{print $2 + 1}'`
 destDir="$destBase/$lastDate-$roll"
 [ $verbose -eq 0 ] && echo "$cmd: New roll is $destDir."
-mkdir -p $destDir/raw || { echo "$cmd: mkdir $destDir failed" >&2;exit 1 ;}
+mkdir -p $destDir/raw || { echo "$cmd: mkdir $destDir failed." >&2;exit 1 ;}
 cd $srcDir
 mv *.CR2 $destDir/raw/
 [ $verbose -eq 0 ] && {  n=`(cd $destDir/raw;ls|wc -l)`
-			 echo "$cmd: $n CR2 files moved to $destDir/raw"
+			 echo "$cmd: $n CR2 files moved to $destDir/raw."
 }
 
 
 if ls *.MOV >/dev/null 2>&1 ;then
 	mkdir -p $destDir/mov 
-	[ $verbose -eq 0 ] && echo "$cmd: moving .MOV files to $destDir/mov" 
+	[ $verbose -eq 0 ] && echo "$cmd: moving .MOV files to $destDir/mov." 
 	mv *.MOV $destDir/mov/
 fi
 cd ~
