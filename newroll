@@ -1,14 +1,14 @@
 #!/bin/bash
-# $Id: newroll,v 1.17 2021/05/17 13:34:42 fulford Exp fulford $
+# $Id: newroll,v 1.18 2021/05/17 13:45:07 fulford Exp fulford $
 # $Source: /src/admin/usr/local/etc/RCS/newroll,v $
-# $Revision: 1.17 $
+# $Revision: 1.18 $
 # Author C W Fulford.
 # Copyright 2016 (c) C W Fulford.
 # Licensed for public use under the LGPL, .
 # For assistance contact fulford@fulford.net 0793 572 8612
 ########################################################################
 cmd=`basename $0`
-ver=`echo "$Id: newroll,v 1.17 2021/05/17 13:34:42 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
+ver=`echo "$Id: newroll,v 1.18 2021/05/17 13:45:07 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
 syntax="$cmd [-c <configfile>] [-d] [-h <hostid>] [-p] [-v]|-V"
 prep=1
 verbose=1
@@ -18,7 +18,7 @@ while [ $# -gt 0 ] ;do
 		-h) hostid=$2;shift 2;;
 		-p) prep=0;shift;;	
 		-v) verbose=0;shift;;
-		-V) echo "$cmd $Revision: 1.17 $ $Date: 2021/05/17 13:34:42 $"|awk '{print $1,$3,$6}';exit;;  
+		-V) echo "$cmd $Revision: 1.18 $ $Date: 2021/05/17 13:45:07 $"|awk '{print $1,$3,$6}';exit;;  
 	esac
 done
 
@@ -39,17 +39,22 @@ if grep -q "$mntPt" ;then
 fi
 for dev in sdj1 sdk1 ;do
   if [ -e /dev/$dev ];then
-	mount /dev/$dev ||{
+	if ! mount /dev/$dev ;then 
 		echo "$cmd: on $mntPt failed." >&2; continue
-	}
+	else
+		[ $verbose -eq 0 ] &&{
+			echo "$cmd: Device $dev mounted."
+		}	
+	fi
 	if [ -d $mntPt/DCIM/101EOS5D ] ;then 
-		[ $verbose -eq 0 ] && echo "$cmd: $dev mounted on $mntPt."
 		break
 	else
-		[ $verbose -eq 0 ] && echo "$cmd: $dev is not a CF card." >&2;
+		[ $verbose -eq 0 ] &&{
+				echo "$cmd: Device $dev is not a CF card." >&2;
+			}
 		umount $mntPt
 		continue
-	fi
+	fi	
   else
 	[ $verbose -eq 0 ] && echo "$cmd: Device /dev/$dev does not exist." >&2
   fi 
